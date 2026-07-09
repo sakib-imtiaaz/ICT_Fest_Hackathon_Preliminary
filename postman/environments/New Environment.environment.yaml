@@ -1,0 +1,15 @@
+name: New Environment
+values:
+  - key: base_url
+    value: 'http://localhost:8000'
+  - key: JWT_SECRET
+    value: 'cowork-dev-secret-change-me'
+  - key: JWT_ALGORITHM
+    value: 'HS256'
+  - key: ACCESS_TOKEN_EXPIRE_MINUTES
+    value: '15'
+  - key: REFRESH_TOKEN_EXPIRE_DAYS
+    value: '7'
+  - key: DATABASE_URL
+    value: 'sqlite:///./cowork.db'
+color: 120

@@ -1,0 +1,38 @@
+$kind: http-request
+name: 'Scenario 2 - Book 11:00–12:00 (Adjacent — expects 409 bug)'
+method: POST
+url: '{{base_url}}/bookings'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Authorization
+    value: 'Bearer {{access_token}}'
+body:
+  type: json
+  content: |-
+    {
+      "room_id": {{room_id}},
+      "start_time": "2026-10-10T11:00:00",
+      "end_time": "2026-10-10T12:00:00"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // BUG: The conflict check in bookings.py uses an inclusive boundary:
+      //   b.start_time <= end AND start <= b.end_time
+      // A booking ending at 11:00 conflicts with one starting at 11:00
+      // because 11:00 <= 11:00 evaluates to true.
+      // Adjacent (back-to-back) bookings should be allowed but are blocked.
+      // Expected correct behaviour: 201 Created
+      // Actual behaviour: 409 ROOM_CONFLICT
+
+      pm.test("BUG: Adjacent slot returns 409 (should be 201)", function () {
+        pm.response.to.have.status(409);
+      });
+
+      pm.test("Error code is ROOM_CONFLICT", function () {
+        const json = pm.response.json();
+        pm.expect(json.code).to.eql("ROOM_CONFLICT");
+      });

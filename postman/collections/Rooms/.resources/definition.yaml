@@ -1,0 +1,3 @@
+$kind: collection
+name: Rooms
+description: Room management endpoints for the CoWork API

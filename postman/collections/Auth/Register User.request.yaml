@@ -1,0 +1,43 @@
+$kind: http-request
+name: Register User
+method: POST
+url: '{{base_url}}/auth/register'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "org_name": "OrgA",
+      "username": "alice",
+      "password": "password123"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status code is 201", function () {
+        pm.response.to.have.status(201);
+      });
+
+      pm.test("Response has user_id and org_id", function () {
+        const json = pm.response.json();
+        pm.expect(json).to.have.property("user_id");
+        pm.expect(json).to.have.property("org_id");
+        pm.expect(json.user_id).to.be.a("number");
+        pm.expect(json.org_id).to.be.a("number");
+      });
+
+      pm.test("Response has username and role", function () {
+        const json = pm.response.json();
+        pm.expect(json.username).to.eql("alice");
+        pm.expect(json).to.have.property("role");
+      });
+
+      // Save user_id for duplicate test
+      const json = pm.response.json();
+      pm.collectionVariables.set("registered_user_id", json.user_id);
+      pm.collectionVariables.set("registered_org_id", json.org_id);
+examples: './.resources/Register User.resources/examples'
